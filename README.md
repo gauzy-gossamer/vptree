@@ -1,0 +1,1 @@
+Vantage point tree. Most of the implementation was taken from tsne package. In addition, this implementation supports sparse arrays (useful for bag-of-words models, for example) and searching by the maximum distance (epsilon value) instead of a fixed number of values.
