@@ -12,7 +12,8 @@ cdef extern from "limits.h":
     int INT_MAX
 
 cdef extern from "vptree.h":
-    cdef cppclass DataPoint
+    cdef cppclass DataPoint:
+        DataPoint(int D, int ind, double *x)
     cdef cppclass DataPointSparse:
         DataPointSparse(int D, int ind, double *x)
     cdef cppclass VpTree[T]:
@@ -39,10 +40,17 @@ cdef class vptree(object):
     def init(self, double[:, ::1] X):
         cdef int N = X.shape[0]
         cdef int D = X.shape[1]
+        cdef double [:] Dt
+        cdef vector[DataPoint] *DP
         if self.sparse:
             print 'failed'
         else:
-            self.tree.create(&X[0,0], D, N)
+            DP = new vector[DataPoint]()
+
+            for i in range(X.shape[0]):
+                Dt = np.ascontiguousarray(X[i], dtype=np.double)
+                DP.push_back(DataPoint(D, i, &Dt[0]))
+            self.tree.create(DP)
 
     def init_sparse(self, np.ndarray X):
         cdef double [:,:] D
