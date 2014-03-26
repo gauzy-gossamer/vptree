@@ -63,15 +63,17 @@ public:
     int dimensionality() const { return _D; }
     double x(int d) const { return _x[d]; }
 
-    void view() { for (int d = 0; d < dimensionality(); d++) { printf("v %i\t%.2f\n", d, this->x(d)); }  }
+    void view() {
+        for (int d = 0; d < dimensionality(); d++) {
+            printf("v %i\t%.2f\n", d, this->x(d));
+        }
+    }
 
     double distance (const DataPoint &t2) const {
         double dd = .0;
         for(int d = 0; d < dimensionality(); d++) {
-            //printf("%.2f - %.2f\n", this->x(d), t2.x(d));
             dd += (this->x(d) - t2.x(d)) * (this->x(d) - t2.x(d));
         }
-        //printf("%i\t%.2f\n", dimensionality(), dd);
         return sqrt(dd);
     }
 };
@@ -189,7 +191,7 @@ public:
                 i++;
             }
 
-            if (i >= t1_size || j >= t2_size) {
+            if (i > t1_size || j > t2_size) {
                 break;
             }
         }
@@ -267,7 +269,6 @@ public:
         if (debug) {
             printf("dim %i\n", this->_D);
         }
-        printf("build %i\n", items->size());
         _root = buildFromPoints(0, items->size());
     }
 
@@ -398,7 +399,6 @@ private:
             
             // Threshold of the new node will be the distance to the median
             node->threshold = _items->at(lower).distance(_items->at(median));
-            printf("set threshold %.2f; upper %i; lower %i; median %i\n", node->threshold, upper, lower, median);
             
             // Recursively build tree
             node->index = lower;
@@ -419,14 +419,13 @@ private:
         double dist = target.distance(_items->at(node->index));
 
         // If current node within radius tau
-        if(dist < _tau) {// && dist <= epsilon) {
+        if(dist < _tau && dist <= epsilon) {
             // remove furthest node from result list (if we already have k results)
             if(heap.size() == k) heap.pop();
             // add current node to result list
             heap.push(HeapItem(node->index, dist));
             // update value of tau (farthest point in result list)
             if(heap.size() == k) _tau = heap.top().dist;
-            printf("tau = %.2f\n", _tau);
         }
         
         // Return if we arrived at a leaf
@@ -434,7 +433,6 @@ private:
             return;
         }
         
-        printf("thre %.2f\n", node->threshold);
         // If the target lies within the radius of ball
         if(dist < node->threshold) {
             // if there can still be neighbors inside the ball, recursively search left child first
